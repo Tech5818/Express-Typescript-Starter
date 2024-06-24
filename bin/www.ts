@@ -2,7 +2,7 @@
  * Module dependencies.
  */
 
-import app from "../app";
+import app from "@src/app";
 import debugs from "debug";
 import http from "http";
 
@@ -65,6 +65,12 @@ const onListening = () => {
 };
 
 /**
+ * Create HTTP server.
+ */
+
+const server = http.createServer(app);
+
+/**
  * Get port from environment and store in Express.
  */
 
@@ -72,15 +78,50 @@ const port = normalizePort(process.env.PORT || "3000");
 app.set("port", port);
 
 /**
- * Create HTTP server.
+ * Setting Database
  */
-
-const server = http.createServer(app);
+import { CustomContainer } from "@src/container";
+import { AppDataSource } from "@src/utils";
+import { Entities } from "@src/entities";
 
 /**
- * Listen on provided port, on all network interfaces.
- */
+   * Setting Container
+   */
+import { useExpressServer } from "routing-controllers";
+import { useContainer } from "routing-controllers";
+import {controllers} from "@controller/index"
 
-server.listen(port);
-server.on("error", onError);
-server.on("listening", onListening);
+
+AppDataSource.initialize()
+  .then(() => {
+    console.log("Database Connection Success");
+    
+    Entities.forEach((entity) => {
+      CustomContainer.set(
+        entity.name+"Repository", 
+        AppDataSource.getRepository(entity)
+      )
+    })
+  })
+  .then(() => {
+  
+    useContainer(CustomContainer);
+
+    useExpressServer(app, {
+      controllers
+    });
+
+    /**
+     * Listen on provided port, on all network interfaces.
+     */
+
+    server.listen(port);
+    server.on("error", onError);
+    server.on("listening", onListening);
+
+  })
+  .catch(() => {
+    console.error("Database Connection Fail")
+  })
+
+

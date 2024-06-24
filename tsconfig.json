@@ -10,6 +10,18 @@
     "noEmit": true,
     "outDir": "./dist",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
+    "sourceMap": true,
+    /**
+     * setting path alias
+    */
+    "baseUrl": "./src",
+    "paths": {
+      "@src/*": ["./*"],
+      "@controller/*": ["./controller/*"],
+      "@utils/*": ["./utils/*"],
+      "@service/*": ["./service/*"]
+    }
   }
 }
